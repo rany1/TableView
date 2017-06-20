@@ -7,28 +7,71 @@
 //
 
 import  UIKit
-let urlPath="http://wthrcdn.etouch.cn/weather_mini?city=%E5%8D%97%E4%BA%AC";
+var urlPath="http://wthrcdn.etouch.cn/weather_mini?city=";
 class RootViewController: UIViewController,UITableViewDelegate,UITableViewDataSource,NSURLConnectionDataDelegate{
     
     var dataArr = NSMutableArray();
     var _tableView:UITableView?;
-    
+    var _label:UILabel?;
+    var _text : UITextField?;
+    var _btn : UIButton?;
     var _connection : NSURLConnection?;
     var _receiveData : NSMutableData?;
     override func viewDidLoad() {
         super.viewDidLoad();
-              var rect:CGRect = self.view.bounds;
-        _tableView=UITableView(frame: rect, style: .plain);
+        //var rect:CGRect = self.view.bounds;
+        self.view.backgroundColor = .white;
+        _label = UILabel(frame: CGRect(x:50,y:100,width:50,height:30))
+        _label?.text="城市:";
+        _label?.textColor = .black;
+         self.view.addSubview(_label!);
+        
+        _text=UITextField(frame: CGRect(x:100,y:100,width:200,height:30));
+        _text?.borderStyle = .roundedRect;
+        _text?.placeholder = "请填写城市";
+        self.view.addSubview(_text!);
+        
+        _btn = UIButton(frame: CGRect(x:300,y:100,width:100,height:30));
+      
+        _btn?.backgroundColor = .orange;
+        _btn?.setTitle("查询", for: .normal);
+        _btn?.addTarget(self, action:#selector(btnQuery(button:)), for: .touchUpInside);
+        self.view.addSubview(_btn!);
+        _tableView=UITableView(frame: CGRect(x:50,y:200,width:300,height:300));
         _tableView?.delegate=self as! UITableViewDelegate;
         _tableView?.dataSource=self as! UITableViewDataSource;
         self.view.addSubview(_tableView!);
         
         
-        downData();
+       // downData();
         
     }
+    func btnQuery(button:UIButton?)  {
+        downData();
+    }
     func downData(){
-        let url=NSURL(string: urlPath);
+        var str = "";
+        if( _text?.text == nil || (_text?.text?.isEmpty)!){
+            str = CFURLCreateStringByAddingPercentEscapes(
+                nil,
+                "南京" as CFString,
+                nil,
+                "!*'();:@&=+$,/?%#[]" as CFString,
+                CFStringBuiltInEncodings.UTF8.rawValue
+            ) as String
+        }else{
+            str = CFURLCreateStringByAddingPercentEscapes(
+                nil,
+                (_text?.text)! as CFString,
+                nil,
+                "!*'();:@&=+$,/?%#[]" as CFString,
+                CFStringBuiltInEncodings.UTF8.rawValue
+            ) as String
+
+        }
+        urlPath = urlPath + str;
+        let url=NSURL(string: urlPath as! String);
+       
         let request=NSURLRequest(url: url as! URL);
         _connection=NSURLConnection(request: request as URLRequest, delegate: self)!;
         
